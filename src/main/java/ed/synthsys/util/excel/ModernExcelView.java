@@ -11,6 +11,10 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -34,6 +38,7 @@ public class ModernExcelView implements AutoCloseable {
     public static final CellCaster<String> STRING_CASTER = new StringCellCaster();
     public static final CellCaster<Double> DOUBLE_CASTER = new DoubleCellCaster();
     public static final CellCaster<Date> DATE_CASTER = new DateCellCaster();
+    public static final CellCaster<Temporal> TEMPORAL_CASTER = new TemporalCellCaster();
     
     /**
      * Workbook which this object represents
@@ -288,15 +293,24 @@ public class ModernExcelView implements AutoCloseable {
     }
 
     public String readStringCell(int rowNr, int colNr) {
-        return readCell(rowNr,colNr,new StringCellCaster());
+        return readCell(rowNr,colNr,STRING_CASTER);
     }
     
     public Date readDateCell(int rowNr, int colNr) {
-        return readCell(rowNr,colNr,new DateCellCaster());
+        return readCell(rowNr,colNr,DATE_CASTER);
     }
     
+    public Temporal readTemporalCell(int rowNr,int colNr) {
+        return readCell(rowNr,colNr,TEMPORAL_CASTER);
+    }
+    
+    public Double readDoubleCell(int rowNr,int colNr) {
+        return readCell(rowNr,colNr,DOUBLE_CASTER);
+    }
+    
+    
 
-    protected <T> T readCell(int rowNr, int colNr, CellCaster<T> caster) {
+    public <T> T readCell(int rowNr, int colNr, CellCaster<T> caster) {
         Row row = sheet.getRow(rowNr);
         if (row == null) return caster.cast(null, formEval);
         Cell cell =row.getCell(colNr, Row.RETURN_BLANK_AS_NULL);
@@ -328,6 +342,14 @@ public class ModernExcelView implements AutoCloseable {
     public String findParamAsString(String paramName,int firstRow,int lastRow) {
 
         return findParam(paramName, firstRow, lastRow, STRING_CASTER);
+    }
+    
+    public String getCurrentSheetName() {
+        return sheet.getSheetName();
+    }
+    
+    public int getCurrentSheetNr() {
+        return workbook.getSheetIndex(sheet);
     }
     
     
@@ -437,6 +459,16 @@ public class ModernExcelView implements AutoCloseable {
         
     }
     
+    protected static class TemporalCellCaster implements  CellCaster<Temporal> {
+
+        @Override
+        public Temporal cast(Cell cell, FormulaEvaluator formEval) {
+            Date date = DATE_CASTER.cast(cell, formEval);
+            if (date == null) return null;
+            return LocalDateTime.ofInstant(date.toInstant(),ZoneId.systemDefault());
+            
+        }
+    }
     
     
 }

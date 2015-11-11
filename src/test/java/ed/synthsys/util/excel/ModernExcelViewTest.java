@@ -7,6 +7,9 @@ package ed.synthsys.util.excel;
 import ed.robust.error.RobustFormatException;
 import ed.robust.error.RobustIOException;
 import java.io.File;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
@@ -207,6 +210,73 @@ public class ModernExcelViewTest {
             pVal = null;
             res = instance.findParam(pName, 0, 8, ModernExcelView.STRING_CASTER);
             assertEquals(pVal, res);           
+        }
+    }
+    
+    @Test
+    public void testGetSheetName() throws RobustIOException, RobustFormatException {
+        
+        File file = new File(getClass().getResource("SimpleImagingData.xlsx").getFile()); 
+        try (ModernExcelView instance = makeInstance(file)) {
+
+            String exp = "Sheet1";
+            String res = instance.getCurrentSheetName();
+            assertEquals(exp, res);
+            
+            instance.selectSheet(2);
+            exp = "Third";
+            res = instance.getCurrentSheetName();
+            assertEquals(exp, res);            
+        }
+    }
+    
+    @Test
+    public void testGetSheetNr() throws RobustIOException, RobustFormatException {
+        
+        File file = new File(getClass().getResource("SimpleImagingData.xlsx").getFile()); 
+        try (ModernExcelView instance = makeInstance(file)) {
+
+            int exp = 0;
+            int res = instance.getCurrentSheetNr();
+            assertEquals(exp, res);
+            
+            instance.selectSheet(2);
+            exp = 2;
+            res = instance.getCurrentSheetNr();
+            assertEquals(exp, res);            
+        }
+    }
+    
+    @Test
+    public void testGetTemporalCell() throws RobustIOException, RobustFormatException {
+        
+        File file = new File(getClass().getResource("SimpleImagingData.xlsx").getFile()); 
+        try (ModernExcelView instance = makeInstance(file)) {
+
+            instance.selectSheet(1);
+            int row = 3;
+            int col = 2;
+            
+            LocalDate exp = LocalDate.of(2015, Month.SEPTEMBER, 1);
+            LocalDate res = LocalDate.from(instance.readTemporalCell(row, col));
+            
+            assertEquals(exp,res);
+        }
+    }
+    
+    @Test
+    public void testGetDoubleCell() throws RobustIOException, RobustFormatException {
+        
+        File file = new File(getClass().getResource("SimpleImagingData.xlsx").getFile()); 
+        try (ModernExcelView instance = makeInstance(file)) {
+
+            int row = 3;
+            int col = 3;
+            
+            double exp = 1487.95276565749;
+            double res = instance.readDoubleCell(row, col);
+            
+            assertEquals(exp,res,1E-6);
         }
     }
     
