@@ -93,7 +93,7 @@ public class ModernExcelView implements AutoCloseable {
                 ((Closeable)this.workbook).close();
             } catch (IOException e) {
                 throw new RuntimeException("Could not close workbook: "+e.getMessage(),e);
-            };
+            }
         }
     }
     
@@ -111,8 +111,7 @@ public class ModernExcelView implements AutoCloseable {
             if (wr == null) return false;
             if (wr.getNumberOfSheets() < 1) return false;
             Sheet sh = wr.getSheetAt(0);
-            if (sh == null) return false;
-            return true;
+            return sh != null;
         } catch (    InvalidFormatException | IllegalArgumentException e)  {
             return false;
         }
@@ -309,8 +308,9 @@ public class ModernExcelView implements AutoCloseable {
      * as pair of cells, in which first cell (column 0) is the parameter name, and the second cell (column 1)
      * is the parameter value. Mothods scans the row in the requested range starting with the firstOne and finishing with the lastRow,
      * returning first value for which cell content at column 0 matches the paramName
+     * @param <T> type for the return value which is set by the CellCaster type 
      * @param paramName name of the parameter (value of the first cell in a row)
-     * @param firstRow 0-based frist row from which data will be read
+     * @param firstRow 0-based first row from which data will be read
      * @param lastRow 0-base last row from which data will be read (inclusive)
      * @param caster converter of cell values to the required values
      * @return found value for the given parameters or null if such parameter name could not be found
