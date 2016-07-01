@@ -4,8 +4,6 @@
  */
 package ed.synthsys.util.excel;
 
-import ed.robust.error.RobustFormatException;
-import ed.robust.error.RobustIOException;
 import java.io.File;
 import java.time.LocalDate;
 import java.time.Month;
@@ -25,7 +23,7 @@ public class ModernExcelViewTest {
     public ModernExcelViewTest() {
     }
     
-    ModernExcelView makeInstance(File file) throws RobustIOException, RobustFormatException {
+    ModernExcelView makeInstance(File file) throws Exception {
         return new ModernExcelView(file);
     }
 
@@ -43,7 +41,7 @@ public class ModernExcelViewTest {
      * Test of selectSheet method, of class ModernExcelView.
      */
     @Test
-    public void testSelectSheet() throws RobustIOException, RobustFormatException {
+    public void testSelectSheet() throws Exception {
         File file = new File(getClass().getResource("SimpleImagingData.xlsx").getFile()); 
         try (ModernExcelView instance = makeInstance(file)) {
             
@@ -176,7 +174,7 @@ public class ModernExcelViewTest {
     }
     
     @Test
-    public void testFindParam() throws RobustIOException, RobustFormatException {
+    public void testFindParam() throws Exception {
         File file = new File(getClass().getResource("SimpleParamData.xlsx").getFile()); 
         try (ModernExcelView instance = makeInstance(file)) {
         
@@ -214,7 +212,7 @@ public class ModernExcelViewTest {
     }
     
     @Test
-    public void testGetSheetName() throws RobustIOException, RobustFormatException {
+    public void testGetSheetName() throws Exception {
         
         File file = new File(getClass().getResource("SimpleImagingData.xlsx").getFile()); 
         try (ModernExcelView instance = makeInstance(file)) {
@@ -231,7 +229,7 @@ public class ModernExcelViewTest {
     }
     
     @Test
-    public void testGetSheetNr() throws RobustIOException, RobustFormatException {
+    public void testGetSheetNr() throws Exception {
         
         File file = new File(getClass().getResource("SimpleImagingData.xlsx").getFile()); 
         try (ModernExcelView instance = makeInstance(file)) {
@@ -248,7 +246,7 @@ public class ModernExcelViewTest {
     }
     
     @Test
-    public void testGetTemporalCell() throws RobustIOException, RobustFormatException {
+    public void testGetTemporalCell() throws Exception {
         
         File file = new File(getClass().getResource("SimpleImagingData.xlsx").getFile()); 
         try (ModernExcelView instance = makeInstance(file)) {
@@ -265,7 +263,7 @@ public class ModernExcelViewTest {
     }
     
     @Test
-    public void testGetDoubleCell() throws RobustIOException, RobustFormatException {
+    public void testGetDoubleCell() throws Exception {
         
         File file = new File(getClass().getResource("SimpleImagingData.xlsx").getFile()); 
         try (ModernExcelView instance = makeInstance(file)) {

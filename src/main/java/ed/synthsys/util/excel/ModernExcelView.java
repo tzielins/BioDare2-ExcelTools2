@@ -4,14 +4,10 @@
  */
 package ed.synthsys.util.excel;
 
-import ed.robust.error.RobustFormatException;
-import ed.robust.error.RobustIOException;
-import ed.robust.error.RobustProcessException;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.Temporal;
@@ -56,36 +52,32 @@ public class ModernExcelView implements AutoCloseable {
     /**
      * Creates new excel view which is based on the content of the file.
      * @param file excel file to be read
-     * @throws RobustIOException when problems with io operations
-     * @throws RobustFormatException fi the file is not an excel file.
+     * @throws IOException when problems with io operations
+     * @throws ExcelFormatException fi the file is not an excel file.
      */
-    public ModernExcelView(File file) throws RobustIOException, RobustFormatException  {
+    public ModernExcelView(File file) throws IOException, ExcelFormatException  {
         
         try {
             this.workbook = WorkbookFactory.create(file);
             selectSheet(0);
-        } catch (IOException e) {
-            throw new RobustIOException(e.getMessage(),e);
         } catch (InvalidFormatException | IllegalArgumentException e) {
-            throw new RobustFormatException("Not valid excel: "+e.getMessage(),e);
+            throw new ExcelFormatException("Not valid excel: "+e.getMessage(),e);
         }
     }
     
     /**
      * Creates new excel view which is based on the content of the file.
      * @param in input stream with excel content to be read
-     * @throws RobustIOException when problems with io operations
-     * @throws RobustFormatException fi the file is not an excel file.
+     * @throws IOException when problems with io operations
+     * @throws ExcelFormatException fi the file is not an excel file.
      */
-    public ModernExcelView(InputStream in) throws RobustIOException, RobustFormatException  {
+    public ModernExcelView(InputStream in) throws IOException, ExcelFormatException  {
         
         try {
             this.workbook = WorkbookFactory.create(in);
             selectSheet(0);
-        } catch (IOException e) {
-            throw new RobustIOException(e.getMessage(),e);
         } catch (InvalidFormatException | IllegalArgumentException e) {
-            throw new RobustFormatException("Not valid excel: "+e.getMessage(),e);
+            throw new ExcelFormatException("Not valid excel: "+e.getMessage(),e);
         }
     }
     
@@ -93,12 +85,10 @@ public class ModernExcelView implements AutoCloseable {
     
     @Override
     public void close() {
-        if (this.workbook instanceof Closeable) {
-            try {
-                ((Closeable)this.workbook).close();
-            } catch (IOException e) {
-                throw new RuntimeException("Could not close workbook: "+e.getMessage(),e);
-            }
+        try {
+            ((Closeable)this.workbook).close();
+        } catch (IOException e) {
+            throw new RuntimeException("Could not close workbook: "+e.getMessage(),e);
         }
     }
     
@@ -136,9 +126,8 @@ public class ModernExcelView implements AutoCloseable {
      * @param rowNr 0-based row number
      * @param firstCol 0-based number of the column from which to start
      * @return list of read values, with nulls in case of empty cell
-     * @throws RobustProcessException if the row could not be read (wrong number, no columns to read from ...)
      */
-    public List<String> readStringRow(int rowNr,int firstCol) throws RobustProcessException {
+    public List<String> readStringRow(int rowNr,int firstCol) {
         return readRow(rowNr,firstCol,new StringCellCaster());
     }
     
@@ -148,9 +137,8 @@ public class ModernExcelView implements AutoCloseable {
      * @param firstCol 0-based number of the column from which to start
      * @param lastCol 0-based last column to read from, inclusive
      * @return list of read values, with nulls in case of empty cell
-     * @throws RobustProcessException 
      */
-    public List<String> readStringRow(int rowNr,int firstCol,int lastCol) throws RobustProcessException {
+    public List<String> readStringRow(int rowNr,int firstCol,int lastCol) {
         Row row = getRow(rowNr);
         if (row == null) return Collections.emptyList();
         return readRow(row,firstCol,lastCol,new StringCellCaster());
@@ -160,9 +148,8 @@ public class ModernExcelView implements AutoCloseable {
      * 
      * @param rowNr
      * @return row of the given nr or null if not found
-     * @throws RobustProcessException 
      */
-    protected final Row getRow(int rowNr) throws RobustProcessException {
+    protected final Row getRow(int rowNr) {
         Row row = sheet.getRow(rowNr);
         //if (row == null) throw new RobustProcessException("No row nr: "+rowNr);
         return row;
@@ -175,9 +162,8 @@ public class ModernExcelView implements AutoCloseable {
      * @param firstCol 0-based number of the column from which to start
      * @param caster code that can convert excel read value to the requested type
      * @return list of read values with null for missing/or not convertable values.
-     * @throws RobustProcessException 
      */
-    public <T> List<T> readRow(int rowNr, int firstCol,CellCaster<T> caster) throws RobustProcessException {
+    public <T> List<T> readRow(int rowNr, int firstCol,CellCaster<T> caster) {
         
         Row row = getRow(rowNr);
         if (row == null) return Collections.emptyList();
@@ -194,10 +180,9 @@ public class ModernExcelView implements AutoCloseable {
      * @param lastCol 0-based last column to read from, inclusive
      * @param caster code that can convert excel read value to the requested type
      * @return list of read values with null for missing/or not convertable values.
-     * @throws RobustProcessException 
      */
-    public <T> List<T> readRow(Row row, int firstCol, int lastCol,CellCaster<T> caster) throws RobustProcessException {
-        if (lastCol < firstCol) throw new RobustProcessException("Wrong column: "+firstCol+"-"+lastCol);
+    public <T> List<T> readRow(Row row, int firstCol, int lastCol,CellCaster<T> caster)  {
+        if (lastCol < firstCol) throw new IllegalArgumentException("Wrong column: "+firstCol+"-"+lastCol);
         List<T> list = new ArrayList<>(lastCol-firstCol);
         
         for (int col = firstCol;col<=lastCol;col++) {
@@ -211,11 +196,10 @@ public class ModernExcelView implements AutoCloseable {
      * Number of the last column that exists in the given row.
      * @param rowNr 0-based row number to check
      * @return
-     * @throws RobustProcessException 
      */
-    public int getLastColumn(int rowNr) throws RobustProcessException {
+    public int getLastColumn(int rowNr) {
         Row row = getRow(rowNr);
-        if (row == null) throw new RobustProcessException("No row nr: "+rowNr);
+        if (row == null) throw new IllegalArgumentException("No row nr: "+rowNr);
         return row.getLastCellNum()-1;
     }
     
@@ -228,9 +212,8 @@ public class ModernExcelView implements AutoCloseable {
      * @param colNr 0-based column number
      * @param firstRow 0-based number of row from which to read from
      * @return list of double that corresponds to all the rows till the end, with null for missing or numercial values
-     * @throws RobustProcessException 
      */
-    public List<Double> readDoubleColumn(int colNr, int firstRow) throws RobustProcessException {
+    public List<Double> readDoubleColumn(int colNr, int firstRow) {
         
         return readColumn(colNr,firstRow,new DoubleCellCaster());
     }
@@ -280,10 +263,9 @@ public class ModernExcelView implements AutoCloseable {
      * @param lastRow 0-base last row from which data will be read (inclusive)
      * @param caster converter of cell values to the required values
      * @return list of list, in which each list correspond to one data column, missing or not convertible values are represented as nulls
-     * @throws RobustProcessException 
      */
-    public <T> List<List<T>> readColumns(int firstCol,int lastCol,int firstRow,int lastRow,CellCaster<T> caster) throws RobustProcessException {
-        if (lastCol < firstCol) throw new RobustProcessException("Wrong columns range: "+firstCol+"-"+lastCol);
+    public <T> List<List<T>> readColumns(int firstCol,int lastCol,int firstRow,int lastRow,CellCaster<T> caster) {
+        if (lastCol < firstCol) throw new IllegalArgumentException("Wrong columns range: "+firstCol+"-"+lastCol);
         
         List<List<T>> columns = new ArrayList<>(lastCol-firstCol+1);
         for (int colIx = firstCol;colIx<=lastCol;colIx++) {
