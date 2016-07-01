@@ -8,6 +8,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.Temporal;
@@ -48,6 +49,18 @@ public class ModernExcelView implements AutoCloseable {
      * Evalulator which will be used to calculate values of the formulas
      */
     FormulaEvaluator formEval;
+
+    
+    /**
+     * Creates new excel view which is based on the content of the file.
+     * @param file excel file to be read
+     * @throws IOException when problems with io operations
+     * @throws ExcelFormatException fi the file is not an excel file.
+     */
+    public ModernExcelView(Path file) throws IOException, ExcelFormatException  {
+        
+        this(file.toFile());
+    }    
     
     /**
      * Creates new excel view which is based on the content of the file.
@@ -203,6 +216,10 @@ public class ModernExcelView implements AutoCloseable {
         return row.getLastCellNum()-1;
     }
     
+    /**
+     * Gets last row number on the sheet
+     * @return rowNr 0-based
+     */
     public int getLastRow() {
         return sheet.getLastRowNum();
     }
