@@ -122,7 +122,7 @@ public class ModernExcelView implements AutoCloseable {
             if (wr.getNumberOfSheets() < 1) return false;
             Sheet sh = wr.getSheetAt(0);
             return sh != null;
-        } catch (    InvalidFormatException | IllegalArgumentException e)  {
+        } catch (    InvalidFormatException | IllegalArgumentException | NotOLE2FileException e)  {
             return false;
         }
     }
