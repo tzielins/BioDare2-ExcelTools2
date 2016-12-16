@@ -113,6 +113,16 @@ public class ModernExcelView implements AutoCloseable {
      * @return true if the file is readable excel
      * @throws IOException if IO problems.
      */
+    public static boolean isExcelFile(Path file) throws IOException {
+        return isExcelFile(file.toFile());
+    }    
+    
+    /**
+     * Checks if the file represents a valid excel file.
+     * @param file to be checked
+     * @return true if the file is readable excel
+     * @throws IOException if IO problems.
+     */
     public static boolean isExcelFile(File file) throws IOException {
 
         try {
