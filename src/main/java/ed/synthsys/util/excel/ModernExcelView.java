@@ -16,7 +16,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import org.apache.poi.UnsupportedFileFormatException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.poifs.filesystem.NotOLE2FileException;
 import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
@@ -73,8 +75,8 @@ public class ModernExcelView implements AutoCloseable {
         try {
             this.workbook = WorkbookFactory.create(file);
             selectSheet(0);
-        } catch (InvalidFormatException | IllegalArgumentException e) {
-            throw new ExcelFormatException("Not valid excel: "+e.getMessage(),e);
+        } catch (InvalidFormatException | IllegalArgumentException | NotOLE2FileException e) {
+            throw new ExcelFormatException("Not valid excel fle: "+e.getMessage(),e);
         }
     }
     
@@ -89,7 +91,7 @@ public class ModernExcelView implements AutoCloseable {
         try {
             this.workbook = WorkbookFactory.create(in);
             selectSheet(0);
-        } catch (InvalidFormatException | IllegalArgumentException e) {
+        } catch (InvalidFormatException | IllegalArgumentException | NotOLE2FileException e) {
             throw new ExcelFormatException("Not valid excel: "+e.getMessage(),e);
         }
     }
@@ -101,7 +103,7 @@ public class ModernExcelView implements AutoCloseable {
         try {
             ((Closeable)this.workbook).close();
         } catch (IOException e) {
-            throw new RuntimeException("Could not close workbook: "+e.getMessage(),e);
+            throw new WorkbookCloseException("Could not close workbook: "+e.getMessage(),e);
         }
     }
     
@@ -469,5 +471,9 @@ public class ModernExcelView implements AutoCloseable {
         }
     }
     
-    
+    public static class WorkbookCloseException extends RuntimeException {
+        WorkbookCloseException(String msg,Throwable e) {
+            super(msg,e);
+        }
+    }
 }
