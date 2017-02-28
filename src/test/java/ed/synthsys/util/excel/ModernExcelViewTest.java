@@ -5,13 +5,17 @@
 package ed.synthsys.util.excel;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 
 /**
  *
@@ -20,6 +24,10 @@ import static org.junit.Assert.*;
 public class ModernExcelViewTest {
     
     static final double EPS = 1E-6;
+    
+    @Rule
+    public TemporaryFolder testFolder = new TemporaryFolder();
+    
     public ModernExcelViewTest() {
     }
     
@@ -278,5 +286,83 @@ public class ModernExcelViewTest {
         }
     }
     
+    @Test
+    public void cloceCanBeCalledMultipleTime() throws Exception {
+        
+        File file = new File(getClass().getResource("SimpleImagingData.xlsx").getFile()); 
+        ModernExcelView instance = makeInstance(file);
+        
+        assertTrue(instance.getLastRow() > 0 );
+        
+        instance.close();
+        
+        instance.close();
+    }
+    
+    @Test
+    public void autoClosingWorks() throws Exception {
+        
+        File file = testFolder.newFile();
+        {
+            File orgFile = new File(getClass().getResource("SimpleImagingData.xlsx").getFile()); 
+            Files.copy(orgFile.toPath(), file.toPath(),StandardCopyOption.REPLACE_EXISTING);
+        }
+        
+        try (ModernExcelView instance = makeInstance(file)) {
+            assertNotNull(instance.getRow(0));
+        }
+        
+        Files.delete(file.toPath());
+        assertFalse(Files.exists(file.toPath()));
+        
+    }    
+    
+    @Test
+    public void getsExceptionIfNotClosedAndDeleted() throws Exception {
+        
+        File file = testFolder.newFile();
+        {
+            File orgFile = new File(getClass().getResource("SimpleImagingData.xlsx").getFile()); 
+            Files.copy(orgFile.toPath(), file.toPath(),StandardCopyOption.REPLACE_EXISTING);
+        }
+        
+        ModernExcelView instance = makeInstance(file);
+        
+        try {
+        Files.delete(file.toPath());
+        assertFalse(Files.exists(file.toPath()));
+            fail("Exception expected");
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+
+        instance.getRow(0);
+        instance.close();
+        
+    }     
+
+    @Test
+    public void viewIsReadOnly() throws Exception {
+        
+        File file = testFolder.newFile();
+        {
+            File orgFile = new File(getClass().getResource("SimpleImagingData.xlsx").getFile()); 
+            Files.copy(orgFile.toPath(), file.toPath(),StandardCopyOption.REPLACE_EXISTING);
+        }
+        
+        try (ModernExcelView instance = makeInstance(file)) {
+            String val = instance.readStringCell(0, 1);
+            assertEquals("Nr",val);
+            instance.sheet.getRow(0).getCell(1).setCellValue("X");
+            val = instance.readStringCell(0, 1);
+            assertEquals("X",val);
+        }
+        
+        try (ModernExcelView instance = makeInstance(file)) {
+            String val = instance.readStringCell(0, 1);
+            assertEquals("Nr",val);
+        }
+        
+    }       
 
 }

@@ -4,7 +4,6 @@
  */
 package ed.synthsys.util.excel;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import org.apache.poi.UnsupportedFileFormatException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.poifs.filesystem.NotOLE2FileException;
 import org.apache.poi.ss.formula.FormulaParseException;
@@ -33,6 +31,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
  * @author tzielins
  */
 public class ModernExcelView implements AutoCloseable {
+    
     
     public static final CellCaster<String> STRING_CASTER = new StringCellCaster();
     public static final CellCaster<Double> DOUBLE_CASTER = new DoubleCellCaster();
@@ -73,7 +72,10 @@ public class ModernExcelView implements AutoCloseable {
     public ModernExcelView(File file) throws IOException, ExcelFormatException  {
         
         try {
-            this.workbook = WorkbookFactory.create(file);
+            this.workbook = WorkbookFactory.create(file,null,true);
+            this.formEval = this.workbook.getCreationHelper().createFormulaEvaluator();
+            this.formEval.setIgnoreMissingWorkbooks(true);
+            
             selectSheet(0);
         } catch (InvalidFormatException | IllegalArgumentException | NotOLE2FileException e) {
             throw new ExcelFormatException("Not valid excel fle: "+e.getMessage(),e);
@@ -90,6 +92,9 @@ public class ModernExcelView implements AutoCloseable {
         
         try {
             this.workbook = WorkbookFactory.create(in);
+            this.formEval = this.workbook.getCreationHelper().createFormulaEvaluator();
+            this.formEval.setIgnoreMissingWorkbooks(true);
+            
             selectSheet(0);
         } catch (InvalidFormatException | IllegalArgumentException | NotOLE2FileException e) {
             throw new ExcelFormatException("Not valid excel: "+e.getMessage(),e);
@@ -101,7 +106,11 @@ public class ModernExcelView implements AutoCloseable {
     @Override
     public void close() {
         try {
-            ((Closeable)this.workbook).close();
+            if (this.formEval != null) {
+                this.formEval.clearAllCachedResultValues();
+            }
+            this.formEval = null;
+            this.workbook.close();
         } catch (IOException e) {
             throw new WorkbookCloseException("Could not close workbook: "+e.getMessage(),e);
         }
@@ -143,7 +152,6 @@ public class ModernExcelView implements AutoCloseable {
      */
     public void selectSheet(int i) {
         sheet = workbook.getSheetAt(i);
-        formEval = sheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
     }
 
     /**
@@ -211,7 +219,7 @@ public class ModernExcelView implements AutoCloseable {
         List<T> list = new ArrayList<>(lastCol-firstCol);
         
         for (int col = firstCol;col<=lastCol;col++) {
-            Cell cell = row.getCell(col,Row.RETURN_BLANK_AS_NULL);
+            Cell cell = row.getCell(col,Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
             list.add(caster.cast(cell, formEval));
         }
         return list;
@@ -277,7 +285,7 @@ public class ModernExcelView implements AutoCloseable {
                 list.add(caster.cast(null, formEval));
                 continue;
             }
-            Cell cell = row.getCell(colNr, Row.RETURN_BLANK_AS_NULL);
+            Cell cell = row.getCell(colNr, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
             list.add(caster.cast(cell, formEval));
         }
         return list;
@@ -324,7 +332,7 @@ public class ModernExcelView implements AutoCloseable {
     public <T> T readCell(int rowNr, int colNr, CellCaster<T> caster) {
         Row row = sheet.getRow(rowNr);
         if (row == null) return caster.cast(null, formEval);
-        Cell cell =row.getCell(colNr, Row.RETURN_BLANK_AS_NULL);
+        Cell cell =row.getCell(colNr, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
         return caster.cast(cell, formEval);
     }
 
