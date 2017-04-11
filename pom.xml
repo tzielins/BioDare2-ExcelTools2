@@ -71,14 +71,14 @@
           <uniqueVersion>false</uniqueVersion>
           <id>biodare-rel</id>
           <name>BioDare releases</name>
-          <url>http://tomato.bio.ed.ac.uk:8881/nexus/content/repositories/biodare-rel</url>
+          <url>http://pumpkin.bio.ed.ac.uk:8881/nexus/content/repositories/biodare-rel</url>
           <layout>default</layout>
         </repository>
         <snapshotRepository>
           <uniqueVersion>true</uniqueVersion>
           <id>biodare-dev</id>
           <name>BioDare Snapshots</name>
-          <url>http://tomato.bio.ed.ac.uk:8881/nexus/content/repositories/biodare-dev</url>
+          <url>http://pumpkin.bio.ed.ac.uk:8881/nexus/content/repositories/biodare-dev</url>
           <layout>default</layout>
         </snapshotRepository>
     </distributionManagement>    
