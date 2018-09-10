@@ -274,7 +274,7 @@ public class ModernExcelView implements AutoCloseable {
         return readColumn(colNr,firstRow,lastRow,caster);
     }
 
-    protected <T> List<T> readColumn(int colNr,int firstRow,int lastRow,CellCaster<T> caster) throws IllegalArgumentException {
+    public <T> List<T> readColumn(int colNr,int firstRow,int lastRow,CellCaster<T> caster) throws IllegalArgumentException {
         
         if (lastRow< firstRow) throw new IllegalArgumentException("Wrong rows range: "+firstRow+"-"+lastRow);
         List<T> list = new ArrayList<>(lastRow-firstRow+1);
