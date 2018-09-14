@@ -329,8 +329,9 @@ public class ModernExcelViewTest {
         ModernExcelView instance = makeInstance(file);
         
         try {
-        Files.delete(file.toPath());
-        assertFalse(Files.exists(file.toPath()));
+            Files.delete(file.toPath());
+            Files.delete(file.toPath());
+            assertFalse(Files.exists(file.toPath()));
             fail("Exception expected");
         } catch (IOException e) {
             System.out.println(e.getMessage());
