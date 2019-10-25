@@ -19,6 +19,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.poifs.filesystem.NotOLE2FileException;
 import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
@@ -37,6 +38,7 @@ public class ModernExcelView implements AutoCloseable {
     public static final CellCaster<Double> DOUBLE_CASTER = new DoubleCellCaster();
     public static final CellCaster<Date> DATE_CASTER = new DateCellCaster();
     public static final CellCaster<Temporal> TEMPORAL_CASTER = new TemporalCellCaster();
+    public static final CellCaster<Object> NATURAL_CASTER = new NaturalCellCaster();
     
     /**
      * Workbook which this object represents
@@ -77,7 +79,7 @@ public class ModernExcelView implements AutoCloseable {
             this.formEval.setIgnoreMissingWorkbooks(true);
             
             selectSheet(0);
-        } catch (InvalidFormatException | IllegalArgumentException | NotOLE2FileException e) {
+        } catch (IllegalArgumentException | NotOLE2FileException e) {
             throw new ExcelFormatException("Not valid excel fle: "+e.getMessage(),e);
         }
     }
@@ -96,7 +98,7 @@ public class ModernExcelView implements AutoCloseable {
             this.formEval.setIgnoreMissingWorkbooks(true);
             
             selectSheet(0);
-        } catch (InvalidFormatException | IllegalArgumentException | NotOLE2FileException e) {
+        } catch (IllegalArgumentException | NotOLE2FileException e) {
             throw new ExcelFormatException("Not valid excel: "+e.getMessage(),e);
         }
     }
@@ -136,12 +138,12 @@ public class ModernExcelView implements AutoCloseable {
 
         try {
 
-            Workbook wr = WorkbookFactory.create(file);
+            Workbook wr = WorkbookFactory.create(file);            
             if (wr == null) return false;
             if (wr.getNumberOfSheets() < 1) return false;
             Sheet sh = wr.getSheetAt(0);
             return sh != null;
-        } catch (    InvalidFormatException | IllegalArgumentException | NotOLE2FileException e)  {
+        } catch (IllegalArgumentException | NotOLE2FileException e)  {
             return false;
         }
     }
@@ -387,20 +389,20 @@ public class ModernExcelView implements AutoCloseable {
         public String cast(Cell cell, FormulaEvaluator formEval) {
             if (cell == null) return null;            
             switch(cell.getCellType()) {
-                case Cell.CELL_TYPE_STRING: return cell.getRichStringCellValue().getString().trim();
-                case Cell.CELL_TYPE_NUMERIC: {
+                case STRING: return cell.getRichStringCellValue().getString().trim();
+                case NUMERIC: {
                     final double val = cell.getNumericCellValue();
                     if (isMathInteger(val)) return Long.toString(Math.round(val));
                     return ""+cell.getNumericCellValue();
                 }
-                case Cell.CELL_TYPE_BOOLEAN: return ""+cell.getBooleanCellValue();
-                case Cell.CELL_TYPE_FORMULA: {
+                case BOOLEAN: return ""+cell.getBooleanCellValue();
+                case FORMULA: {
                     //logger.debug("Formula in #0,#1 :#2",""+cell.getRowIndex(),""+cell.getColumnIndex(),cell.getCellFormula());
                     try {
                         CellValue val = formEval.evaluate(cell);
-                        if (val.getCellType() == Cell.CELL_TYPE_NUMERIC) return ""+val.getNumberValue();
-                        if (val.getCellType() == Cell.CELL_TYPE_STRING) return val.getStringValue().trim();
-                        if (val.getCellType() == Cell.CELL_TYPE_BOOLEAN) return ""+val.getBooleanValue();
+                        if (val.getCellType() == CellType.NUMERIC) return ""+val.getNumberValue();
+                        if (val.getCellType() == CellType.STRING) return val.getStringValue().trim();
+                        if (val.getCellType() == CellType.BOOLEAN) return ""+val.getBooleanValue();
                     } catch (FormulaParseException e) {
                         return null;
                     }
@@ -418,19 +420,19 @@ public class ModernExcelView implements AutoCloseable {
             if (cell == null) return null;
             
             switch(cell.getCellType()) {
-                case Cell.CELL_TYPE_NUMERIC: return cell.getNumericCellValue();
-                case Cell.CELL_TYPE_FORMULA: {
+                case NUMERIC: return cell.getNumericCellValue();
+                case FORMULA: {
                     //logger.debug("Formula in #0,#1 :#2",""+cell.getRowIndex(),""+cell.getColumnIndex(),cell.getCellFormula());
                     try {
                         CellValue val = formEval.evaluate(cell);
-                        if (val.getCellType() == Cell.CELL_TYPE_NUMERIC) return val.getNumberValue();
+                        if (val.getCellType() == CellType.NUMERIC) return val.getNumberValue();
                     } catch (FormulaParseException e) {
                         //logger.warn("Error evaluating formula: #0, #1", e, cell.getCellFormula(),e.getMessage());
                         return null;
                     }
                     return null;
                 }
-                case Cell.CELL_TYPE_STRING: {
+                case STRING: {
                     try {
                         return Double.parseDouble(cell.getStringCellValue());
                     } catch(Exception e) {
@@ -450,8 +452,8 @@ public class ModernExcelView implements AutoCloseable {
             if (cell == null) return null;
             
             switch(cell.getCellType()) {
-                case Cell.CELL_TYPE_NUMERIC: return cell.getDateCellValue();
-                case Cell.CELL_TYPE_FORMULA: {
+                case NUMERIC: return cell.getDateCellValue();
+                case FORMULA: {
                     //logger.debug("Formula in #0,#1 :#2",""+cell.getRowIndex(),""+cell.getColumnIndex(),cell.getCellFormula());
                     try {
                         CellValue val = formEval.evaluate(cell);
@@ -464,7 +466,7 @@ public class ModernExcelView implements AutoCloseable {
                     }
                     return null;
                 }
-                case Cell.CELL_TYPE_STRING: {
+                case STRING: {
                     try {
                         //return Double.parseDouble(cell.getStringCellValue());
                         return null;
@@ -477,6 +479,31 @@ public class ModernExcelView implements AutoCloseable {
         }
         
     }
+    
+    protected static class NaturalCellCaster implements CellCaster<Object> {
+
+        @Override
+        public Object cast(Cell cell, FormulaEvaluator formEval) {
+            if (cell == null) return null;            
+            switch(cell.getCellType()) {
+                case STRING: return cell.getRichStringCellValue().getString().trim();
+                case NUMERIC: return cell.getNumericCellValue();
+                case BOOLEAN: return cell.getBooleanCellValue();
+                case FORMULA: {
+                    try {
+                        CellValue val = formEval.evaluate(cell);
+                        if (val.getCellType() == CellType.NUMERIC) return val.getNumberValue();
+                        if (val.getCellType() == CellType.STRING) return val.getStringValue().trim();
+                        if (val.getCellType() == CellType.BOOLEAN) return val.getBooleanValue();
+                    } catch (FormulaParseException e) {
+                        return null;
+                    }
+                    return null;
+                }
+                default: return null;
+            }            
+        }        
+    }    
     
     protected static class TemporalCellCaster implements  CellCaster<Temporal> {
 
