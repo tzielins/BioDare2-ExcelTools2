@@ -7,13 +7,10 @@ package ed.synthsys.util.excel;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -93,7 +90,7 @@ public class XLSX2TextConverterTest {
             
             List<String> lines = Files.readAllLines(outFile);
             
-            lines.forEach( System.out::println);
+            // lines.forEach( System.out::println);
             
             List<String> exp = List.of(
                     "",

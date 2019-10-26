@@ -54,8 +54,11 @@ import org.xml.sax.XMLReader;
 
 class XLSX2TextConverter {
     
-
     public void convert(Path inFile, Path outFile) throws InvalidFormatException, IOException {
+        convert(inFile, outFile, ",");
+    }
+
+    public void convert(Path inFile, Path outFile, String SEP) throws InvalidFormatException, IOException {
         
         try (OPCPackage opcPackage = OPCPackage.open(inFile.toFile(), PackageAccess.READ)) {
             
@@ -67,7 +70,7 @@ class XLSX2TextConverter {
             
             try (BufferedWriter out = Files.newBufferedWriter(outFile)) {
                 XMLReader sheetParser = SAXHelper.newXMLReader(); 
-                XSSFSheetXMLHandler handler = buildXMLHandler(opcPackage, xssfReader, out);
+                XSSFSheetXMLHandler handler = buildXMLHandler(opcPackage, xssfReader, out, SEP);
                 sheetParser.setContentHandler(handler);
 
                 InputSource sheetSource = new InputSource(sheets.next());            
@@ -79,15 +82,16 @@ class XLSX2TextConverter {
     }
     
     
-    XSSFSheetXMLHandler buildXMLHandler(OPCPackage opcPackage, XSSFReader xssfReader, BufferedWriter out) throws IOException, InvalidFormatException {
+    XSSFSheetXMLHandler buildXMLHandler(OPCPackage opcPackage, XSSFReader xssfReader, BufferedWriter out,
+            String SEP) throws IOException, InvalidFormatException {
           
         try {
-            StylesTable styles = xssfReader.getStylesTable();
+            StylesTable styles = new StylesTable(); //xssfReader.getStylesTable();
             ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(opcPackage);
             DataFormatter formatter = new NoFormatingDataFormatter();
 
 
-            SheetContentsHandler sheetHandler = new SheetToCSVHandler(out);
+            SheetContentsHandler sheetHandler = new SheetToCSVHandler(out, SEP);
 
             XSSFSheetXMLHandler handler = new XSSFSheetXMLHandler(
                       styles, null, strings, sheetHandler, formatter, false);            

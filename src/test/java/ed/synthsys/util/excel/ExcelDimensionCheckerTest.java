@@ -5,7 +5,6 @@
  */
 package ed.synthsys.util.excel;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
