@@ -7,6 +7,8 @@ package ed.synthsys.util.excel;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.Month;
@@ -14,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 
@@ -44,6 +47,14 @@ public class ModernExcelViewTest {
         File file = new File(getClass().getResource("SimpleImagingData.xlsx").getFile());       
         assertTrue(ModernExcelView.isExcelFile(file));
     }
+    
+    @Test
+    @Ignore("Not commited test file")
+    public void testCanCheckFormatOfLargeFile() throws Exception {
+        
+        Path file = Paths.get("E:\\Temp\\long_10000x1200.xlsx");
+        assertTrue(ModernExcelView.isExcelFile(file));
+    }    
 
     /**
      * Test of selectSheet method, of class ModernExcelView.

@@ -30,35 +30,17 @@ import org.apache.poi.ss.usermodel.FormulaEvaluator;
 
 
 
-public class NoFormatingDataFormatter extends DataFormatter {
-
-    
- 
+class NoFormatingDataFormatter extends DataFormatter {
 
 
-
-
-    /**
-     * Formats the given raw cell value, based on the supplied
-     *  format index and string, according to excel style rules.
-     * @see #formatCellValue(Cell)
-     */
+    @Override
     public String formatRawCellContents(double value, int formatIndex, String formatString, boolean use1904Windowing) {
         
         
         return String.valueOf(value);
     }
 
-
-
-
-
-
-
-
-
-
-    private String getUnFormattedNumberString(Cell cell, ConditionalFormattingEvaluator cfEvaluator) {
+    String getUnFormattedNumberString(Cell cell, ConditionalFormattingEvaluator cfEvaluator) {
         if (cell == null) {
             return null;
         }
@@ -74,34 +56,8 @@ public class NoFormatingDataFormatter extends DataFormatter {
         return String.valueOf(cell.getNumericCellValue());
     }
 
-    
-    /**
-     * <p>
-     * Returns the formatted value of a cell as a <tt>String</tt> regardless
-     * of the cell type. If the Excel number format pattern cannot be parsed then the
-     * cell value will be formatted using a default format.
-     * </p>
-     * <p>When passed a null or blank cell, this method will return an empty
-     * String (""). Formula cells will be evaluated using the given
-     * {@link FormulaEvaluator} if the evaluator is non-null. If the
-     * evaluator is null, then the formula String will be returned. The caller
-     * is responsible for setting the currentRow on the evaluator
-     *</p>
-     * <p>
-     * When a ConditionalFormattingEvaluator is present, it is checked first to see
-     * if there is a number format to apply.  If multiple rules apply, the last one is used.
-     * If no ConditionalFormattingEvaluator is present, no rules apply, or the applied
-     * rules do not define a format, the cell's style format is used.
-     * </p>
-     * <p>
-     * The two evaluators should be from the same context, to avoid inconsistencies in cached values.
-     *</p>
-     *
-     * @param cell The cell (can be null)
-     * @param evaluator The FormulaEvaluator (can be null)
-     * @param cfEvaluator ConditionalFormattingEvaluator (can be null)
-     * @return a string value of the cell
-     */
+
+    @Override
     public String formatCellValue(Cell cell, FormulaEvaluator evaluator, ConditionalFormattingEvaluator cfEvaluator) {
         
         if (cell == null) {
