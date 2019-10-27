@@ -46,6 +46,18 @@ public class ModernExcelViewTest {
     public void testIsExcelFile() throws Exception {
         File file = new File(getClass().getResource("SimpleImagingData.xlsx").getFile());       
         assertTrue(ModernExcelView.isExcelFile(file));
+        
+        file = new File(getClass().getResource("SimpleImagingData.xls").getFile());       
+        assertTrue(ModernExcelView.isExcelFile(file));        
+        
+        file = new File(getClass().getResource("2CSVTest.csv").getFile());       
+        assertFalse(ModernExcelView.isExcelFile(file));        
+        
+        file = new File(getClass().getResource("col1609.zip").getFile());       
+        assertFalse(ModernExcelView.isExcelFile(file));     
+        
+        file = testFolder.newFile();
+        assertFalse(ModernExcelView.isExcelFile(file));     
     }
     
     @Test

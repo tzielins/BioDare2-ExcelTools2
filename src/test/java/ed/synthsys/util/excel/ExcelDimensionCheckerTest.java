@@ -11,6 +11,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 
 /**
  *
@@ -63,6 +64,7 @@ public class ExcelDimensionCheckerTest {
     }    
     
     @Test
+    @Ignore("Test file not commited")
     public void testCanCheckLargeFiles() throws Exception {
         
         

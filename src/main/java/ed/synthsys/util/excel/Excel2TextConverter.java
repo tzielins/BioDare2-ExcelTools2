@@ -6,23 +6,10 @@
 package ed.synthsys.util.excel;
 
 import static ed.synthsys.util.excel.ExcelDimensionChecker.isOldXLS;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.formula.FormulaParseException;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.CellValue;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 /**
  *
@@ -33,7 +20,7 @@ public class Excel2TextConverter {
     final XLSX2TextConverter xlsxConverter = new XLSX2TextConverter();
     final Workbook2TextConverter workbookConverter = new Workbook2TextConverter();
     
-    int WORKBOOK_SIZE_THRESHOLD = 25*1024*1024; // 20Mb
+    int WORKBOOK_SIZE_THRESHOLD = 25*1024*1024; // 25Mb
     
     public void convert(Path inFile, Path outFile) throws IOException, InvalidFormatException {
         convert(inFile, outFile, ",");

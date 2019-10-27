@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
@@ -34,16 +33,17 @@ class Workbook2TextConverter {
     
     public void convert(Path inFile, Path outFile, String SEP) throws IOException {
         
-        Workbook workbook = WorkbookFactory.create(inFile.toFile());
-        if (workbook.getNumberOfSheets() < 1) {
-            throw new IOException("No sheets in file");
-        }
-        
-        FormulaEvaluator formEval = workbook.getCreationHelper().createFormulaEvaluator();
-        formEval.setIgnoreMissingWorkbooks(true); 
-        
-        Sheet sheet = workbook.getSheetAt(0);
-        convert(sheet, formEval, outFile, SEP);
+        try (Workbook workbook = WorkbookFactory.create(inFile.toFile())) {
+            if (workbook.getNumberOfSheets() < 1) {
+                throw new IOException("No sheets in file");
+            }
+
+            FormulaEvaluator formEval = workbook.getCreationHelper().createFormulaEvaluator();
+            formEval.setIgnoreMissingWorkbooks(true); 
+
+            Sheet sheet = workbook.getSheetAt(0);
+            convert(sheet, formEval, outFile, SEP);
+        };
     }    
     
     void convert(Sheet sheet, FormulaEvaluator formEval, Path outFile, String SEP) throws IOException {

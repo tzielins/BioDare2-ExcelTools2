@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.EmptyFileException;
 import org.apache.poi.poifs.filesystem.NotOLE2FileException;
 import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -136,14 +136,14 @@ public class ModernExcelView implements AutoCloseable {
      */
     public static boolean isExcelFile(File file) throws IOException {
 
-        try {
+        try(Workbook wr = WorkbookFactory.create(file)) {
 
-            Workbook wr = WorkbookFactory.create(file);            
             if (wr == null) return false;
             if (wr.getNumberOfSheets() < 1) return false;
+            
             Sheet sh = wr.getSheetAt(0);
             return sh != null;
-        } catch (IllegalArgumentException | NotOLE2FileException e)  {
+        } catch (IOException|EmptyFileException e)  {
             return false;
         }
     }
