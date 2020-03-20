@@ -17,17 +17,12 @@
 
 // from http://svn.apache.org/repos/asf/poi/trunk/src/examples/src/org/apache/poi/xssf/eventusermodel/
 
-package ed.synthsys.util.excel;
+package ed.biodare.data.excel;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -35,7 +30,6 @@ import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ooxml.util.SAXHelper;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -52,13 +46,10 @@ import org.xml.sax.XMLReader;
 // Based on http://svn.apache.org/repos/asf/poi/trunk/src/examples/src/org/apache/poi/xssf/eventusermodel/
 
 
-class XLSX2TextConverter {
+class XLSXDimensionsChecker {
     
-    public void convert(Path inFile, Path outFile) throws InvalidFormatException, IOException {
-        convert(inFile, outFile, ",");
-    }
 
-    public void convert(Path inFile, Path outFile, String SEP) throws InvalidFormatException, IOException {
+    public int[] rowsColsDimensions(Path inFile) throws InvalidFormatException, IOException {
         
         try (OPCPackage opcPackage = OPCPackage.open(inFile.toFile(), PackageAccess.READ)) {
             
@@ -67,31 +58,29 @@ class XLSX2TextConverter {
             if (!sheets.hasNext()) {
                 throw new InvalidFormatException("Could not read any sheets");
             }
-            
-            try (BufferedWriter out = Files.newBufferedWriter(outFile)) {
-                XMLReader sheetParser = SAXHelper.newXMLReader(); 
-                XSSFSheetXMLHandler handler = buildXMLHandler(opcPackage, xssfReader, out, SEP);
-                sheetParser.setContentHandler(handler);
 
-                InputSource sheetSource = new InputSource(sheets.next());            
-                sheetParser.parse(sheetSource);            
-            }
+            SheetToSizeHandler sizer = new SheetToSizeHandler();            
+            XSSFSheetXMLHandler handler = buildXMLHandler(opcPackage, xssfReader, sizer);
+
+            XMLReader sheetParser = SAXHelper.newXMLReader(); 
+            sheetParser.setContentHandler(handler);
+
+            InputSource sheetSource = new InputSource(sheets.next());            
+            sheetParser.parse(sheetSource);            
+            
+            return new int[]{sizer.rows, sizer.cols};
         } catch (OpenXML4JException| SAXException | ParserConfigurationException e) {
             throw new IOException("Could not open the file: "+e.getMessage(),e);
         }
     }
     
     
-    XSSFSheetXMLHandler buildXMLHandler(OPCPackage opcPackage, XSSFReader xssfReader, BufferedWriter out,
-            String SEP) throws IOException, InvalidFormatException {
+    XSSFSheetXMLHandler buildXMLHandler(OPCPackage opcPackage, XSSFReader xssfReader, SheetContentsHandler sheetHandler) throws IOException, InvalidFormatException {
           
         try {
-            StylesTable styles = new StylesTable(); //xssfReader.getStylesTable();
+            StylesTable styles = new StylesTable(); // xssfReader.getStylesTable();
             ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(opcPackage);
             DataFormatter formatter = new NoFormatingDataFormatter();
-
-
-            SheetContentsHandler sheetHandler = new SheetToCSVHandler(out, SEP);
 
             XSSFSheetXMLHandler handler = new XSSFSheetXMLHandler(
                       styles, null, strings, sheetHandler, formatter, false);            
@@ -102,99 +91,46 @@ class XLSX2TextConverter {
         }
     }
     
-    static class SheetToCSVHandler implements SheetContentsHandler {
-
-        final BufferedWriter out;
-        final String SEP;
+    static class SheetToSizeHandler implements SheetContentsHandler {
         
-        int currentRow = -1;
-        int nextCol = 0; 
-        List<Object> row = new ArrayList<>();
+        public int rows = 0;
+        public int cols = 0; 
         
-        SheetToCSVHandler(BufferedWriter out) {
-            this(out, ",");
+        SheetToSizeHandler() {
         }
         
-        SheetToCSVHandler(BufferedWriter out, String SEP) {
-            this.out = out;
-            this.SEP = SEP;
-        }
         
         @Override
         public void startRow(int rowNum) {
             
-            // in case of rows gaps
-            addRows(rowNum-currentRow-1);
-            
-            currentRow = rowNum;
-            nextCol = 0;            
-            row = new ArrayList<>();
+            rows = Math.max(rows, rowNum+1);
         }
 
         @Override
         public void endRow(int i) {
-            try {
-                String line = row.stream()
-                            .map( v -> v == null ? "" : v.toString())
-                            .collect(Collectors.joining(SEP));
-                out.write(line);                
-                out.newLine();
-            } catch (IOException e) {
-                throw new RuntimeIOException(e);
-            }
         }
 
         @Override
         public void cell(String cellAddress, String value, XSSFComment comment) {
             
-            // gracefully handle missing CellRef here in a similar way as XSSFCell does
             if(cellAddress == null) {
-                cellAddress = new CellAddress(currentRow, nextCol).formatAsString();
+                return;
             }
             
             CellReference cellRef = new CellReference(cellAddress);
             int cellCol = cellRef.getCol();
             
-            for (; nextCol < cellCol; nextCol++) {
-                row.add(null);
-            }
+            cols = Math.max(cols, cellCol+1);
             
-            if (value == null) value = "";
-            if (value.contains(SEP)) value = "\""+value+"\"";
-            
-            row.add(value);
-            nextCol++;
         }
 
         @Override
         public void endSheet() {
-            
-            try (out) {
-                out.flush();
-            } catch (IOException e) {
-                throw new RuntimeIOException(e);
-            }
         }
         
-        void addRows(int number) {
-            try {
-                for (int i=0; i<number; i++) {
-                    out.newLine();
-                }
-            } catch (IOException e) {
-                throw new RuntimeIOException(e);
-            }
-        }        
         
     }
     
-    public static class RuntimeIOException extends RuntimeException {
-
-        public RuntimeIOException(IOException cause) {
-            super(cause.getMessage(),cause);
-        }
-        
-    }
     
 
 }

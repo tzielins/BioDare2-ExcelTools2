@@ -1,4 +1,4 @@
-package ed.synthsys.util.excel;
+package ed.biodare.data.excel;
 
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;

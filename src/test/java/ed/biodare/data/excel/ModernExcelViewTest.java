@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package ed.synthsys.util.excel;
+package ed.biodare.data.excel;
 
 import java.io.File;
 import java.io.IOException;
