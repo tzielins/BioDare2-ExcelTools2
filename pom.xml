@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>ed.biodare.data</groupId>
     <artifactId>excel-tools</artifactId>
-    <version>1.6-SNAPSHOT</version>
+    <version>1.6.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <properties>
         <java.version>11</java.version>
@@ -62,41 +62,7 @@
                 </execution>
               </executions>
             </plugin>
-            <!--<plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.4.3</version>
-                <configuration>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                </configuration>
-            </plugin>-->
         </plugins>    
     </build>
     
-    <!--
-    <distributionManagement>
-        <repository>
-          <uniqueVersion>false</uniqueVersion>
-          <id>biodare-rel</id>
-          <name>BioDare releases</name>
-          <url>http://pumpkin.bio.ed.ac.uk:8881/nexus/content/repositories/biodare-rel</url>
-          <layout>default</layout>
-        </repository>
-        <snapshotRepository>
-          <uniqueVersion>true</uniqueVersion>
-          <id>biodare-dev</id>
-          <name>BioDare Snapshots</name>
-          <url>http://pumpkin.bio.ed.ac.uk:8881/nexus/content/repositories/biodare-dev</url>
-          <layout>default</layout>
-        </snapshotRepository>
-    </distributionManagement>    
-    -->
 </project>
