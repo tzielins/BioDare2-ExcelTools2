@@ -63,7 +63,7 @@ public class XLSXDimensionsCheckerTest {
     @Ignore("Not commited test file")
     public void testCanCheckLargeFiles() throws Exception {
         
-        Path inFile = Paths.get("E:\\Temp\\long_10000x1200.xlsx");
+        Path inFile = Paths.get(this.getClass().getResource("long_10000x1200.xlsx").toURI());;
         
         int[] rowsCols = instance.rowsColsDimensions(inFile);
 

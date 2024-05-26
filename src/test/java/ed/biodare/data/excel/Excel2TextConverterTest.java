@@ -36,10 +36,10 @@ public class Excel2TextConverterTest {
     }
 
     @Test
-    @Ignore("ONot commited tets file")
+    @Ignore("Not commited the large tets file as >156Mg and gitub refuses")
     public void testCanSaveLargeToCSV() throws Exception {
         
-        Path inFile = Paths.get("E:\\Temp\\long_10000x1200.xlsx");
+        Path inFile = Paths.get(this.getClass().getResource("long_10000x1200.xlsx").toURI());
         Path outFile = inFile.getParent().resolve(inFile.getFileName().toString()+".excel2text.csv");   
         
         instance.convert(inFile, outFile);
@@ -106,11 +106,11 @@ public class Excel2TextConverterTest {
     }    
     
     @Test
-    @Ignore("Not commited test file")
+    //@Ignore("Not commited test file")
     public void testConvertsMediumXLSFile() throws Exception {
         
             
-            Path inFile = Paths.get("E:\\Temp\\long_255x5000.xls");
+            Path inFile = Paths.get(this.getClass().getResource("long_255x5000.xls").toURI());
             Path outFile = testFolder.newFile().toPath();   
             instance.convert(inFile, outFile);
             

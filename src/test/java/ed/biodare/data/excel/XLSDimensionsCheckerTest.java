@@ -45,7 +45,7 @@ public class XLSDimensionsCheckerTest {
     //@Ignore("Not commited test file")
     public void testCanCheckLargeXlSFile() throws Exception {
         
-        Path inFile = Paths.get("E:\\Temp\\long_255x10000.xls");
+        Path inFile = Paths.get(this.getClass().getResource("long_255x10000.xls").toURI());;
         
         int[] rowsCols = instance.rowsColsDimensions(inFile);
 
